@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"io/ioutil"
+	"bytes"
 	"github.com/cristib89/go-crypto/utils"
 )
 
@@ -35,24 +36,32 @@ func (client *HttpDhClient) SetDhClient() {
 
 func (client *HttpDhClient) SetUpMux() {
 	mux := http.NewServeMux()
-    mux.HandleFunc("/publicKey", client.PKHandler)
-    //mux.HandleFunc("/trigger", client.TriggerKeyExchage)
+	mux.HandleFunc("/refresh", client.RefreshHandler)
+    mux.HandleFunc("/exchange", client.PKHandler)
     client.mux = mux
 }
 
+func (client *HttpDhClient) RefreshHandler(w http.ResponseWriter, r *http.Request) {
+	client.dhClient.RefreshPrivateKey()
+	client.SetSharedSecret()
+}
+
 func (client *HttpDhClient) PKHandler(w http.ResponseWriter, r *http.Request) {
+    bodyBytes, err2 := ioutil.ReadAll(r.Body)
+    if err2 != nil {
+    	log.Fatal(err2)
+    }
+    defer r.Body.Close()
+    rcvPublicKey := string(bodyBytes)
+    client.dhClient.SetSharedSecret(utils.HexToInt(rcvPublicKey))
+	log.Println(client.dhClient.sharedKey)
 	publicKey := utils.IntToHex(client.dhClient.SendPublicKey())
     w.Write([]byte(publicKey))
 }
-/**
-func (client *HttpDhClient) TriggerKeyExchage(w http.ResponseWriter, r *http.Request) {
-	//client.dhClient.RefreshPrivateKey()
-	client.SetSharedSecret()
-	w.Write([]byte("Done"))
-}
-**/
+
 func (client *HttpDhClient) SetSharedSecret() {
-	resp, err := http.Get(client.remoteAddress+"/publicKey")
+	sendingPublicKey := bytes.NewBuffer([]byte(utils.IntToHex(client.dhClient.SendPublicKey())))
+	resp, err := http.Post(client.remoteAddress+"/exchange","text/plain",sendingPublicKey)
 	if err != nil {
 	    log.Fatal(err)
 	}
