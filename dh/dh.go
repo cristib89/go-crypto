@@ -20,6 +20,10 @@ func NewDHClient(group *NumberGroup) *DiffieHellmanClient {
 	return &client
 }
 
+func (dhClient *DiffieHellmanClient) GetSharedSecret() *big.Int {
+	return dhClient.sharedKey
+}
+
 func (dhClient *DiffieHellmanClient) SetSharedSecret(receivedPublicKey *big.Int) {
 	dhClient.sharedKey = secretKey(dhClient.privateKey, receivedPublicKey, dhClient.group.p)
 }

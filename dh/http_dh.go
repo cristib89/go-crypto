@@ -54,7 +54,6 @@ func (client *HttpDhClient) PKHandler(w http.ResponseWriter, r *http.Request) {
     defer r.Body.Close()
     rcvPublicKey := string(bodyBytes)
     client.dhClient.SetSharedSecret(utils.HexToInt(rcvPublicKey))
-	log.Println(client.dhClient.sharedKey)
 	publicKey := utils.IntToHex(client.dhClient.SendPublicKey())
     w.Write([]byte(publicKey))
 }
@@ -73,7 +72,6 @@ func (client *HttpDhClient) SetSharedSecret() {
 	    }
 	    rcvPublicKey := string(bodyBytes)
 	    client.dhClient.SetSharedSecret(utils.HexToInt(rcvPublicKey))
-		log.Println(client.dhClient.sharedKey)
 	}
 }
 
