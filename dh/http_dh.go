@@ -72,6 +72,7 @@ func (client *HttpDhClient) SetSharedSecret() {
 	    }
 	    rcvPublicKey := string(bodyBytes)
 	    client.dhClient.SetSharedSecret(utils.HexToInt(rcvPublicKey))
+	    log.Println("Request processed successfully!")
 	}
 }
 
