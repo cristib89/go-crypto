@@ -1,4 +1,4 @@
-package dh
+package http_dh
 
 import (
 	"testing"
